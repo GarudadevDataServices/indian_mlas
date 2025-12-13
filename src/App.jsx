@@ -70,6 +70,13 @@ function App() {
     setSelectedAcId(null); // Reset selection
   };
 
+  // Handle Reset View
+  const handleResetView = () => {
+    setSelectedState('');
+    setSelectedAcId(null);
+    setSidebarOpen(false);
+  };
+
   // Show loading screen while data loads
   if (loading) {
     return <LoadingScreen />;
@@ -84,6 +91,7 @@ function App() {
         selectedParty={selectedParty}
         onSelectConstituency={handleSelectConstituency}
         selectedAcId={selectedAcId}
+        onResetView={handleResetView}
       />
 
       <Controls
