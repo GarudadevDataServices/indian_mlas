@@ -95,76 +95,34 @@ const MapComponent = ({ data, bounds, mode, selectedParty, onSelectConstituency,
             zoomControl={false}
         >
             <LayersControl position="topright">
-                <LayersControl.BaseLayer name="Google-Maps">
-                    <TileLayer
-                        url="https://api.mapbox.com/styles/v1/mapbox/outdoors-v11/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZGF0dGEwNyIsImEiOiJja3A2dHRrajEyN3JwMnZtd2ZtZTZnYzB4In0.i89VhIgx3UVvpTffewpr4Q"
-                        attribution='&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a>'
-                        tileSize={512}
-                        zoomOffset={-1}
-                    />
-                </LayersControl.BaseLayer>
-                <LayersControl.BaseLayer name="Satellite">
-                    <TileLayer
-                        url="https://api.mapbox.com/styles/v1/mapbox/satellite-v9/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZGF0dGEwNyIsImEiOiJja3A2dHRrajEyN3JwMnZtd2ZtZTZnYzB4In0.i89VhIgx3UVvpTffewpr4Q"
-                        attribution='&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a>'
-                        tileSize={512}
-                        zoomOffset={-1}
-                    />
-                </LayersControl.BaseLayer>
-                <LayersControl.BaseLayer name="Satellite-Label">
-                    <TileLayer
-                        url="https://api.mapbox.com/styles/v1/mapbox/satellite-streets-v11/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZGF0dGEwNyIsImEiOiJja3A2dHRrajEyN3JwMnZtd2ZtZTZnYzB4In0.i89VhIgx3UVvpTffewpr4Q"
-                        attribution='&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a>'
-                        tileSize={512}
-                        zoomOffset={-1}
-                    />
-                </LayersControl.BaseLayer>
-                <LayersControl.BaseLayer name="Streets">
-                    <TileLayer
-                        url="https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZGF0dGEwNyIsImEiOiJja3A2dHRrajEyN3JwMnZtd2ZtZTZnYzB4In0.i89VhIgx3UVvpTffewpr4Q"
-                        attribution='&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a>'
-                        tileSize={512}
-                        zoomOffset={-1}
-                    />
-                </LayersControl.BaseLayer>
-                <LayersControl.BaseLayer name="Navigation-day">
-                    <TileLayer
-                        url="https://api.mapbox.com/styles/v1/mapbox/navigation-day-v1/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZGF0dGEwNyIsImEiOiJja3A2dHRrajEyN3JwMnZtd2ZtZTZnYzB4In0.i89VhIgx3UVvpTffewpr4Q"
-                        attribution='&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a>'
-                        tileSize={512}
-                        zoomOffset={-1}
-                    />
-                </LayersControl.BaseLayer>
-                <LayersControl.BaseLayer name="Navigation-night">
-                    <TileLayer
-                        url="https://api.mapbox.com/styles/v1/mapbox/navigation-night-v1/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZGF0dGEwNyIsImEiOiJja3A2dHRrajEyN3JwMnZtd2ZtZTZnYzB4In0.i89VhIgx3UVvpTffewpr4Q"
-                        attribution='&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a>'
-                        tileSize={512}
-                        zoomOffset={-1}
-                    />
-                </LayersControl.BaseLayer>
-                <LayersControl.BaseLayer name="Light">
-                    <TileLayer
-                        url="https://api.mapbox.com/styles/v1/mapbox/light-v10/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZGF0dGEwNyIsImEiOiJja3A2dHRrajEyN3JwMnZtd2ZtZTZnYzB4In0.i89VhIgx3UVvpTffewpr4Q"
-                        attribution='&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a>'
-                        tileSize={512}
-                        zoomOffset={-1}
-                    />
-                </LayersControl.BaseLayer>
-                <LayersControl.BaseLayer name="Dark">
-                    <TileLayer
-                        url="https://api.mapbox.com/styles/v1/mapbox/dark-v10/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZGF0dGEwNyIsImEiOiJja3A2dHRrajEyN3JwMnZtd2ZtZTZnYzB4In0.i89VhIgx3UVvpTffewpr4Q"
-                        attribution='&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a>'
-                        tileSize={512}
-                        zoomOffset={-1}
-                    />
-                </LayersControl.BaseLayer>
+                {/* Mapbox Tile Layers */}
+                {[
+                    { name: 'Google-Maps', style: 'outdoors-v11' },
+                    { name: 'Satellite', style: 'satellite-v9' },
+                    { name: 'Satellite-Label', style: 'satellite-streets-v11' },
+                    { name: 'Streets', style: 'streets-v11' },
+                    { name: 'Navigation-day', style: 'navigation-day-v1' },
+                    { name: 'Navigation-night', style: 'navigation-night-v1' },
+                    { name: 'Light', style: 'light-v10' },
+                    { name: 'Dark', style: 'dark-v10' },
+                ].map(layer => (
+                    <LayersControl.BaseLayer key={layer.name} name={layer.name}>
+                        <TileLayer
+                            url={`https://api.mapbox.com/styles/v1/mapbox/${layer.style}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZGF0dGEwNyIsImEiOiJja3A2dHRrajEyN3JwMnZtd2ZtZTZnYzB4In0.i89VhIgx3UVvpTffewpr4Q`}
+                            attribution='&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a>'
+                            tileSize={512}
+                            zoomOffset={-1}
+                        />
+                    </LayersControl.BaseLayer>
+                ))}
+                {/* OpenStreetMap */}
                 <LayersControl.BaseLayer name="OpenStreetMap">
                     <TileLayer
                         url="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     />
                 </LayersControl.BaseLayer>
+                {/* No Base Layer */}
                 <LayersControl.BaseLayer checked name="None">
                     <TileLayer url="" />
                 </LayersControl.BaseLayer>

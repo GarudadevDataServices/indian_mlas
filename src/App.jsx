@@ -2,11 +2,14 @@ import React, { useState, useEffect, useMemo } from 'react';
 import MapComponent from './components/MapContainer';
 import Sidebar from './components/Sidebar';
 import Controls from './components/Controls';
-import mapData from './data/map_data.json'; // Need to access data for sidebar
+import Legend from './components/Legend';
+import LoadingScreen from './components/LoadingScreen';
 import searchIndex from './data/search_index.json';
 import stateBounds from './data/state_bounds.json';
 
 function App() {
+  const [mapData, setMapData] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [mapMode, setMapMode] = useState('WINNER');
   const [selectedParty, setSelectedParty] = useState('BJP'); // Default party
   const [selectedAcId, setSelectedAcId] = useState(null);
@@ -14,14 +17,23 @@ function App() {
   const [selectedFeatureData, setSelectedFeatureData] = useState(null);
   const [selectedState, setSelectedState] = useState('');
 
+  // Lazy load map data
+  useEffect(() => {
+    import('./data/map_data.json').then(data => {
+      setMapData(data.default);
+      setLoading(false);
+    });
+  }, []);
+
   // Filter Data based on State
   const filteredMapData = useMemo(() => {
+    if (!mapData) return null;
     if (!selectedState) return mapData;
     return {
       ...mapData,
       features: mapData.features.filter(f => f.properties.st_name === selectedState)
     };
-  }, [selectedState]);
+  }, [selectedState, mapData]);
 
   // Get Bounds for State
   const mapBounds = useMemo(() => {
@@ -40,12 +52,11 @@ function App() {
 
   // Handle Search
   const handleSearch = (acId) => {
+    if (!mapData) return;
     const feature = mapData.features.find(f => f.properties.ac_id === acId);
     if (feature) {
       handleSelectConstituency(feature.properties);
-      // If state filter is active and different, maybe reset it? 
-      // Or just let map zoom to it.
-      // Ideally we should switch state filter to this AC's state if we want to show it.
+      // If state filter is active and different, switch to this AC's state
       if (selectedState && feature.properties.st_name !== selectedState) {
         setSelectedState(feature.properties.st_name);
       }
@@ -58,6 +69,11 @@ function App() {
     setSidebarOpen(false);
     setSelectedAcId(null); // Reset selection
   };
+
+  // Show loading screen while data loads
+  if (loading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <div className="h-screen w-screen relative overflow-hidden font-sans text-slate-900">
@@ -78,6 +94,8 @@ function App() {
         onSearch={handleSearch}
         onStateChange={handleStateChange}
       />
+
+      <Legend mode={mapMode} selectedParty={selectedParty} />
 
       {sidebarOpen && (
         <Sidebar

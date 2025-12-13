@@ -97,31 +97,3 @@ export const getColorForMode = (feature, mode, selectedParty) => {
     }
 };
 
-function getColorWithOpacity(color, opacity) {
-    opacity = Math.min(1, Math.max(0.1, opacity));
-
-    // Handle hex
-    if (color.startsWith('#')) {
-        let c;
-        if (/^#([A-Fa-f0-9]{3}){1,2}$/.test(color)) {
-            c = color.substring(1).split('');
-            if (c.length == 3) {
-                c = [c[0], c[0], c[1], c[1], c[2], c[2]];
-            }
-            c = '0x' + c.join('');
-            return 'rgba(' + [(c >> 16) & 255, (c >> 8) & 255, c & 255].join(',') + ',' + opacity + ')';
-        }
-    }
-
-    // Handle rgba
-    if (color.startsWith('rgba')) {
-        return color.replace(/[\d\.]+\)$/g, `${opacity})`);
-    }
-
-    // Handle rgb
-    if (color.startsWith('rgb')) {
-        return color.replace(')', `, ${opacity})`).replace('rgb', 'rgba');
-    }
-
-    return color;
-}
