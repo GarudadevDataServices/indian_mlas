@@ -1,6 +1,5 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { getPartyColor } from '../utils/colors';
-import partyColors from '../data/colors.json';
 
 const LEGEND_CONFIG = {
     WINNER: {
@@ -59,29 +58,89 @@ const LEGEND_CONFIG = {
     }
 };
 
-// Top parties to show in legend
-const TOP_PARTIES = ['BJP', 'INC', 'AAP', 'TMC', 'DMK', 'YSRCP', 'BJD', 'TRS', 'SP', 'NCP'];
-
-const Legend = ({ mode, selectedParty }) => {
+const Legend = ({ mode, selectedParty, data, inline = false }) => {
     const config = LEGEND_CONFIG[mode];
+
+    // Calculate dynamic stats for party-based modes
+    const partyStats = useMemo(() => {
+        if (!data || !config || config.type !== 'parties') return [];
+
+        const counts = {};
+        let total = 0;
+
+        data.features.forEach(f => {
+            const p = f.properties;
+            const party = mode === 'WINNER' ? p.winner_party : p.runnerup_party;
+            if (party) {
+                counts[party] = (counts[party] || 0) + 1;
+                total++;
+            }
+        });
+
+        return Object.entries(counts)
+            .map(([party, count]) => ({ party, count, percentage: (count / total) * 100 }))
+            .sort((a, b) => b.count - a.count);
+    }, [data, mode, config]);
+
     if (!config) return null;
 
-    // For party-based modes, show party colors
+    const containerClass = inline
+        ? "w-full rounded-xl border border-slate-200 bg-slate-50 p-3 animate-fadeIn"
+        : "absolute bottom-4 left-4 bg-white/95 backdrop-blur-xl rounded-xl shadow-2xl border border-white/40 p-4 z-[1000] min-w-[220px] max-w-[260px] animate-fadeIn";
+
+    // For party-based modes (Winner/Runner-up), show dynamic stats
     if (config.type === 'parties') {
-        const parties = TOP_PARTIES.filter(p => partyColors[p]);
+        // Show top 8 parties, group others
+        const topParties = partyStats.slice(0, 8);
+        const othersCount = partyStats.slice(8).reduce((sum, item) => sum + item.count, 0);
+
         return (
-            <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-lg rounded-xl shadow-xl border border-white/30 p-3 z-[1000] max-w-[200px] animate-fadeIn">
-                <h4 className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">{config.title}</h4>
-                <div className="grid grid-cols-2 gap-1.5">
-                    {parties.map(party => (
-                        <div key={party} className="flex items-center gap-1.5">
-                            <div
-                                className="w-3 h-3 rounded-sm flex-shrink-0"
-                                style={{ backgroundColor: getPartyColor(party) }}
-                            />
-                            <span className="text-[10px] text-slate-700 truncate">{party}</span>
+            <div className={containerClass}>
+                <div className="flex items-center justify-between mb-3 border-b border-slate-200 pb-2">
+                    <h4 className="text-sm font-bold text-slate-700">{config.title}</h4>
+                    <span className="text-xs font-medium text-slate-500 bg-white px-2 py-0.5 rounded-full border border-slate-200">
+                        {data?.features?.length || 0} Total
+                    </span>
+                </div>
+
+                <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
+                    {topParties.map((item, index) => (
+                        <div key={item.party} className="flex items-center justify-between group">
+                            <div className="flex items-center gap-2.5">
+                                <span className="text-xs font-medium text-slate-400 w-4">{index + 1}.</span>
+                                <div
+                                    className="w-3.5 h-3.5 rounded-md shadow-sm border border-black/5"
+                                    style={{ backgroundColor: getPartyColor(item.party) }}
+                                />
+                                <span className="text-xs font-semibold text-slate-700 truncate max-w-[100px]" title={item.party}>
+                                    {item.party}
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <div className="h-1.5 w-12 bg-slate-200 rounded-full overflow-hidden">
+                                    <div
+                                        className="h-full rounded-full transition-all duration-500"
+                                        style={{
+                                            width: `${Math.max(item.percentage, 5)}%`,
+                                            backgroundColor: getPartyColor(item.party)
+                                        }}
+                                    />
+                                </div>
+                                <span className="text-xs font-bold text-slate-600 w-6 text-right">{item.count}</span>
+                            </div>
                         </div>
                     ))}
+
+                    {othersCount > 0 && (
+                        <div className="flex items-center justify-between pt-2 border-t border-slate-200 mt-1">
+                            <span className="text-xs font-semibold text-slate-500 pl-7">Others</span>
+                            <span className="text-xs font-bold text-slate-500 pr-0.5">{othersCount}</span>
+                        </div>
+                    )}
+
+                    {topParties.length === 0 && (
+                        <div className="text-xs text-slate-400 text-center py-2">No data available</div>
+                    )}
                 </div>
             </div>
         );
@@ -89,7 +148,7 @@ const Legend = ({ mode, selectedParty }) => {
 
     // For gradient-based modes
     return (
-        <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-lg rounded-xl shadow-xl border border-white/30 p-3 z-[1000] animate-fadeIn">
+        <div className={inline ? "w-full rounded-xl border border-slate-200 bg-slate-50 p-3 animate-fadeIn" : "absolute bottom-4 left-4 bg-white/90 backdrop-blur-lg rounded-xl shadow-xl border border-white/30 p-3 z-[1000] animate-fadeIn"}>
             <h4 className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
                 {config.title}
                 {mode === 'VOTE_SHARE' && selectedParty && (

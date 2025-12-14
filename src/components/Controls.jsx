@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import searchIndex from '../data/search_index.json';
 import partyColors from '../data/colors.json';
+import Legend from './Legend';
 import _ from 'lodash';
 
 const MODES = [
@@ -17,7 +18,8 @@ const MODES = [
 const Controls = ({
     currentMode, onModeChange,
     selectedParty, onPartyChange,
-    onSearch, onStateChange
+    onSearch, onStateChange,
+    data
 }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [isOpen, setIsOpen] = useState(true);
@@ -78,7 +80,7 @@ const Controls = ({
                 </div>
 
                 {/* Controls */}
-                <div className="p-4 space-y-5 overflow-y-auto h-[calc(100%-80px)]">
+                <div className="p-4 space-y-5 overflow-y-auto h-[calc(100%-80px)] custom-scrollbar">
                     {/* Map Mode Selector */}
                     <div>
                         <label className={labelStyle}>
@@ -170,15 +172,8 @@ const Controls = ({
                     {/* Divider */}
                     <div className="border-t border-slate-200 pt-1"></div>
 
-                    {/* Help text */}
-                    <div className="bg-slate-50 rounded-xl p-3 text-xs text-slate-500">
-                        <p className="font-medium text-slate-600 mb-1">💡 Tips</p>
-                        <ul className="space-y-1 list-disc list-inside">
-                            <li>Click any constituency to view details</li>
-                            <li>Use state filter to zoom to a state</li>
-                            <li>Toggle panel with the arrow button</li>
-                        </ul>
-                    </div>
+                    {/* Legend (Replaces Tips) */}
+                    <Legend mode={currentMode} selectedParty={selectedParty} data={data} inline={true} />
                 </div>
             </div>
         </>

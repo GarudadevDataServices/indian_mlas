@@ -101,9 +101,8 @@ function App() {
         onPartyChange={setSelectedParty}
         onSearch={handleSearch}
         onStateChange={handleStateChange}
+        data={filteredMapData}
       />
-
-      <Legend mode={mapMode} selectedParty={selectedParty} />
 
       {sidebarOpen && (
         <Sidebar
