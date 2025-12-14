@@ -44,7 +44,7 @@ const MapComponent = ({ data, bounds, mode, selectedParty, onSelectConstituency,
     const style = (feature) => {
         return {
             fillColor: getColorForMode(feature, mode, selectedParty),
-            weight: 0.8,
+            weight: 0.4,
             opacity: 0.8,
             color: '#374151',
             fillOpacity: 0.75
