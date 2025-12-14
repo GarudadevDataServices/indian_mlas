@@ -26,7 +26,13 @@ const Controls = ({
 
     // Extract unique states
     const states = useMemo(() => {
-        const s = _.uniqBy(searchIndex, 'st_code').map(i => i.label.match(/\((.*?)\)/)[1]).sort();
+        const s = _.uniqBy(searchIndex, 'st_code')
+            .map(i => {
+                const match = i.label.match(/\(([^)]+)\)$/);
+                return match ? match[1] : null;
+            })
+            .filter(Boolean)
+            .sort();
         return s;
     }, []);
 
@@ -161,7 +167,7 @@ const Controls = ({
                                     >
                                         <div className="font-medium text-slate-800">{item.label.split('(')[0].trim()}</div>
                                         <div className="text-xs text-slate-500">
-                                            {item.label.match(/\((.*?)\)/)?.[1]}
+                                            {item.label.match(/\(([^)]+)\)$/)?.[1]}
                                         </div>
                                     </div>
                                 ))}
