@@ -13,6 +13,7 @@ const MODES = [
     { id: 'DEMOGRAPHICS_CATEGORY', label: 'By Category', icon: '📋' },
 ];
 
+// Controls component
 const Controls = ({
     currentMode, onModeChange,
     selectedParty, onPartyChange,
