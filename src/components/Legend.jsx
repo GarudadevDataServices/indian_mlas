@@ -64,6 +64,18 @@ const LEGEND_CONFIG = {
             { color: '#059669', value: 'ST', label: 'ST' },
             { color: '#f59e0b', value: 'GEN', label: 'General' },
         ]
+    },
+    DEMOGRAPHICS_AGE: {
+        title: 'Winner Age',
+        type: 'statsWithCount',
+        countField: 'winner_age',
+        ranges: [
+            { color: '#10b981', min: 0, max: 35, label: '21-35 (Young)' },
+            { color: '#14b8a6', min: 35, max: 45, label: '36-45' },
+            { color: '#f59e0b', min: 45, max: 55, label: '46-55' },
+            { color: '#f97316', min: 55, max: 65, label: '56-65' },
+            { color: '#ef4444', min: 65, max: 150, label: '65+ (Senior)' },
+        ]
     }
 };
 

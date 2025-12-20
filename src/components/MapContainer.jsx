@@ -1,19 +1,26 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { MapContainer, TileLayer, GeoJSON, useMap, LayersControl, ZoomControl } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { getColorForMode, getPartyColor } from '../utils/colors';
+import { featurePassesFilters } from '../App';
 
-const MapComponent = ({ data, bounds, mode, selectedParty, onSelectConstituency, selectedAcId, onResetView }) => {
+const MapComponent = ({ data, bounds, mode, selectedParty, onSelectConstituency, selectedAcId, onResetView, filters }) => {
     // Store references to layers by AC ID for efficient updates
     const layersRef = useRef({});
     const prevSelectedAcIdRef = useRef(null);
 
     // Use refs to access latest props in event handlers
-    const propsRef = useRef({ mode, selectedParty, selectedAcId });
+    const propsRef = useRef({ mode, selectedParty, selectedAcId, filters });
 
     useEffect(() => {
-        propsRef.current = { mode, selectedParty, selectedAcId };
-    }, [mode, selectedParty, selectedAcId]);
+        propsRef.current = { mode, selectedParty, selectedAcId, filters };
+    }, [mode, selectedParty, selectedAcId, filters]);
+
+    // Check if any advanced filter is active
+    const hasActiveFilters = useMemo(() => {
+        if (!filters) return false;
+        return Object.values(filters).some(v => v && v !== '');
+    }, [filters]);
 
     // Handle selection changes efficiently
     useEffect(() => {
@@ -39,14 +46,28 @@ const MapComponent = ({ data, bounds, mode, selectedParty, onSelectConstituency,
         }
 
         prevSelectedAcIdRef.current = newAcId;
-    }, [selectedAcId, mode, selectedParty]);
+    }, [selectedAcId, mode, selectedParty, filters]);
 
     const style = (feature) => {
+        // Check if feature is filtered out
+        const isFilteredOut = hasActiveFilters && !featurePassesFilters(feature, filters);
+
+        // If filtered out, show with white fill and dim border
+        if (isFilteredOut) {
+            return {
+                fillColor: '#ffffff',
+                weight: 0.3,
+                opacity: 0.4,
+                color: '#d1d5db',
+                fillOpacity: 0.6
+            };
+        }
+
         const fillColor = getColorForMode(feature, mode, selectedParty);
+        const isNoParticipation = fillColor === '#ffffff';
 
         // For VOTE_SHARE mode, apply special border styling
         if (mode === 'VOTE_SHARE') {
-            const isNoParticipation = fillColor === '#ffffff';
             return {
                 fillColor: fillColor,
                 weight: isNoParticipation ? 0.5 : 1,
@@ -57,8 +78,9 @@ const MapComponent = ({ data, bounds, mode, selectedParty, onSelectConstituency,
         }
 
         if (mode === 'MARGIN' || mode === 'TURNOUT'
-            || mode === 'DEMOGRAPHICS_GENDER' || mode === 'DEMOGRAPHICS_CATEGORY') {
-            const isNoParticipation = fillColor === '#ffffff';
+            || mode === 'DEMOGRAPHICS_GENDER' || mode === 'DEMOGRAPHICS_CATEGORY'
+            || mode === 'DEMOGRAPHICS_AGE') {
+
             return {
                 fillColor: fillColor,
                 weight: isNoParticipation ? 0.5 : 0.8,
@@ -115,15 +137,26 @@ const MapComponent = ({ data, bounds, mode, selectedParty, onSelectConstituency,
                 onSelectConstituency(feature.properties);
             },
             mouseover: (e) => {
-                const { selectedAcId } = propsRef.current;
+                const { selectedAcId, filters } = propsRef.current;
                 if (selectedAcId && feature.properties.ac_id === selectedAcId) return;
 
+                // Check if this feature is filtered out - don't highlight filtered out features as prominently
+                const isFilteredOut = hasActiveFilters && !featurePassesFilters(feature, filters);
+
                 const layer = e.target;
-                layer.setStyle({
-                    weight: 2.5,
-                    color: '#1e40af',
-                    fillOpacity: 0.9
-                });
+                if (isFilteredOut) {
+                    layer.setStyle({
+                        weight: 1,
+                        color: '#9ca3af',
+                        fillOpacity: 0.7
+                    });
+                } else {
+                    layer.setStyle({
+                        weight: 2.5,
+                        color: '#1e40af',
+                        fillOpacity: 0.9
+                    });
+                }
                 layer.bringToFront();
             },
             mouseout: (e) => {
@@ -135,6 +168,12 @@ const MapComponent = ({ data, bounds, mode, selectedParty, onSelectConstituency,
             }
         });
     };
+
+    // Generate a key that includes filter state to force re-render when filters change
+    const filterKey = useMemo(() => {
+        if (!filters) return '';
+        return Object.values(filters).join('-');
+    }, [filters]);
 
     return (
         <MapContainer
@@ -186,7 +225,7 @@ const MapComponent = ({ data, bounds, mode, selectedParty, onSelectConstituency,
 
             {data && (
                 <GeoJSON
-                    key={`${data.features.length}-${mode}-${selectedParty}`}
+                    key={`${data.features.length}-${mode}-${selectedParty}-${filterKey}`}
                     data={data}
                     style={style}
                     onEachFeature={onEachFeature}

@@ -92,6 +92,15 @@ export const getColorForMode = (feature, mode, selectedParty) => {
             if (props.winner_category === 'ST') return '#059669'; // Green
             return '#f59e0b'; // Amber (General)
 
+        case 'DEMOGRAPHICS_AGE':
+            // Age-based coloring
+            const age = props.winner_age || 0;
+            if (age <= 35) return '#10b981'; // Emerald (Young)
+            if (age <= 45) return '#14b8a6'; // Teal
+            if (age <= 55) return '#f59e0b'; // Amber
+            if (age <= 65) return '#f97316'; // Orange
+            return '#ef4444'; // Red (Senior)
+
         default:
             return getPartyColor(props.winner_party);
     }
