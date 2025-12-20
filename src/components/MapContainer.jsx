@@ -42,8 +42,35 @@ const MapComponent = ({ data, bounds, mode, selectedParty, onSelectConstituency,
     }, [selectedAcId, mode, selectedParty]);
 
     const style = (feature) => {
+        const fillColor = getColorForMode(feature, mode, selectedParty);
+
+        // For VOTE_SHARE mode, apply special border styling
+        if (mode === 'VOTE_SHARE') {
+            const isNoParticipation = fillColor === '#ffffff';
+            return {
+                fillColor: fillColor,
+                weight: isNoParticipation ? 0.5 : 1,
+                opacity: isNoParticipation ? 0.5 : 0.8,
+                color: isNoParticipation ? '#d1d5db' : '#374151',
+                fillOpacity: 0.75
+            };
+        }
+
+        if (mode === 'MARGIN' || mode === 'TURNOUT'
+            || mode === 'DEMOGRAPHICS_GENDER' || mode === 'DEMOGRAPHICS_CATEGORY') {
+            const isNoParticipation = fillColor === '#ffffff';
+            return {
+                fillColor: fillColor,
+                weight: isNoParticipation ? 0.5 : 0.8,
+                opacity: isNoParticipation ? 0.5 : 0.6,
+                color: isNoParticipation ? '#d1d5db' : '#374151',
+                fillOpacity: 0.75
+            };
+        }
+
+        // Default styling for other modes (WINNER, RUNNER_UP, etc.)
         return {
-            fillColor: getColorForMode(feature, mode, selectedParty),
+            fillColor: fillColor,
             weight: 0.4,
             opacity: 0.8,
             color: '#374151',

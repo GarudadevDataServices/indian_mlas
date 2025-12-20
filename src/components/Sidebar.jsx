@@ -121,7 +121,7 @@ const Sidebar = ({ data, onClose }) => {
                 {/* External Link */}
                 {wiki_link && (
                     <a
-                        href={`https://en.wikipedia.org${wiki_link}`}
+                        href={`https://en.wikipedia.org/wiki${wiki_link}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl text-white font-medium hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg shadow-blue-500/25"
